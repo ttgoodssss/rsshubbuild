@@ -1,0 +1,33 @@
+name: Build latest RSSHub (legacy Docker compatible)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout latest RSSHub
+        uses: actions/checkout@v4
+        with:
+          repository: DIYgod/RSSHub
+          ref: master
+          fetch-depth: 1
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build RSSHub image (no push)
+        run: |
+          docker build -t rsshub-latest:legacy .
+
+      - name: Export image as tar (gzip compatible)
+        run: |
+          docker save rsshub-latest:legacy -o rsshub-latest-legacy.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rsshub-latest-legacy
+          path: rsshub-latest-legacy.tar
